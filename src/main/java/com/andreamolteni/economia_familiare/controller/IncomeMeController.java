@@ -1,7 +1,9 @@
 package com.andreamolteni.economia_familiare.controller;
 
+import com.andreamolteni.economia_familiare.dto.ExpenseResponse;
 import com.andreamolteni.economia_familiare.dto.IncomeRequest;
 import com.andreamolteni.economia_familiare.dto.IncomeResponse;
+import com.andreamolteni.economia_familiare.entity.Expense;
 import com.andreamolteni.economia_familiare.entity.Income;
 import com.andreamolteni.economia_familiare.repository.IncomeRepository;
 import com.andreamolteni.economia_familiare.security.CurrentUserService;
@@ -28,7 +30,7 @@ public class IncomeMeController {
     public List<IncomeResponse> list() {
         var u = currentUser.requireUser();
         return incomeRepo.findByUser_IdOrderByDateAsc(u.getId()).stream()
-                .map(i -> new IncomeResponse(i.getId(), u.getId(), i.getType(), i.getDescription(), i.getAmount(), i.getDate()))
+                .map(i -> new IncomeResponse(i.getId(), i.getType(), i.getDescription(), i.getAmount(), i.getDate()))
                 .toList();
     }
 
@@ -45,7 +47,7 @@ public class IncomeMeController {
         i.setDate(req.date());
 
         Income saved = incomeRepo.save(i);
-        return new IncomeResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
+        return new IncomeResponse(saved.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
     }
 
     @PutMapping("/{incomeId}")
@@ -61,7 +63,7 @@ public class IncomeMeController {
         i.setDate(req.date());
 
         Income saved = incomeRepo.save(i);
-        return new IncomeResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
+        return new IncomeResponse(saved.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
     }
 
     @DeleteMapping("/{incomeId}")
@@ -73,6 +75,16 @@ public class IncomeMeController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Income non trovata"));
 
         incomeRepo.delete(i);
+    }
+
+    @GetMapping("/{incomeId}")
+    public IncomeResponse get(@PathVariable Long incomeId) {
+        var u = currentUser.requireUser();
+
+        Income i = incomeRepo.findByIdAndUser_Id(incomeId, u.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Income non trovata"));
+
+        return new IncomeResponse(i.getId(), i.getType(), i.getDescription(), i.getAmount(), i.getDate());
     }
 }
 

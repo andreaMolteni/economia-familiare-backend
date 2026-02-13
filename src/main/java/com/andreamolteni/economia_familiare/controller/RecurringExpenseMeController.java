@@ -28,7 +28,7 @@ public class RecurringExpenseMeController {
     public List<RecurringResponse> list() {
         var u = currentUser.requireUser();
         return repo.findByUser_Id(u.getId()).stream()
-                .map(r -> new RecurringResponse(r.getId(), u.getId(), r.getType(), r.getDescription(),
+                .map(r -> new RecurringResponse(r.getId(), r.getType(), r.getDescription(),
                         r.getAmount(), r.getDate(), r.getMonths(), r.getDayOfTheMonth()))
                 .toList();
     }
@@ -51,7 +51,7 @@ public class RecurringExpenseMeController {
         r.setDayOfTheMonth(req.dayOfTheMonth());
 
         RecurringExpense saved = repo.save(r);
-        return new RecurringResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(),
+        return new RecurringResponse(saved.getId(), saved.getType(), saved.getDescription(),
                 saved.getAmount(), saved.getDate(), saved.getMonths(), saved.getDayOfTheMonth());
     }
 
@@ -73,7 +73,7 @@ public class RecurringExpenseMeController {
         r.setDayOfTheMonth(req.dayOfTheMonth());
 
         RecurringExpense saved = repo.save(r);
-        return new RecurringResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(),
+        return new RecurringResponse(saved.getId(), saved.getType(), saved.getDescription(),
                 saved.getAmount(), saved.getDate(), saved.getMonths(), saved.getDayOfTheMonth());
     }
 

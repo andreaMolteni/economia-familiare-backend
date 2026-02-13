@@ -67,7 +67,7 @@ public class OverviewService {
                     e.getId(),
                     e.getType(),
                     e.getDescription(),
-                    e.getValue(),         // se in Expense hai "value" come field java
+                    e.getAmount(),         // se in Expense hai "value" come field java
                     e.getDate(),
                     e.getDate().isBefore(asOf)
             ));

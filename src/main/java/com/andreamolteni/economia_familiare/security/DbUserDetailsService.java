@@ -2,12 +2,14 @@ package com.andreamolteni.economia_familiare.security;
 
 import com.andreamolteni.economia_familiare.entity.User;
 import com.andreamolteni.economia_familiare.repository.UserRepository;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Primary
 @Service
 public class DbUserDetailsService implements UserDetailsService {
 

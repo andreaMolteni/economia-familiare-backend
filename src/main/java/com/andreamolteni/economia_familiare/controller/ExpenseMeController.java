@@ -28,7 +28,7 @@ public class ExpenseMeController {
     public List<ExpenseResponse> list() {
         var u = currentUser.requireUser();
         return expenseRepo.findByUser_IdOrderByDateAsc(u.getId()).stream()
-                .map(e -> new ExpenseResponse(e.getId(), u.getId(), e.getType(), e.getDescription(), e.getValue(), e.getDate()))
+                .map(e -> new ExpenseResponse(e.getId(), e.getType(), e.getDescription(), e.getAmount(), e.getDate()))
                 .toList();
     }
 
@@ -41,11 +41,11 @@ public class ExpenseMeController {
         e.setUser(u);
         e.setType(req.type().trim());
         e.setDescription(req.description().trim());
-        e.setValue(req.amount());
+        e.setAmount(req.amount());
         e.setDate(req.date());
 
         Expense saved = expenseRepo.save(e);
-        return new ExpenseResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(), saved.getValue(), saved.getDate());
+        return new ExpenseResponse(saved.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
     }
 
     @PutMapping("/{expenseId}")
@@ -57,11 +57,11 @@ public class ExpenseMeController {
 
         e.setType(req.type().trim());
         e.setDescription(req.description().trim());
-        e.setValue(req.amount());
+        e.setAmount(req.amount());
         e.setDate(req.date());
 
         Expense saved = expenseRepo.save(e);
-        return new ExpenseResponse(saved.getId(), u.getId(), saved.getType(), saved.getDescription(), saved.getValue(), saved.getDate());
+        return new ExpenseResponse(saved.getId(), saved.getType(), saved.getDescription(), saved.getAmount(), saved.getDate());
     }
 
     @DeleteMapping("/{expenseId}")
@@ -71,5 +71,15 @@ public class ExpenseMeController {
         Expense e = expenseRepo.findByIdAndUser_Id(expenseId, u.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense non trovata"));
         expenseRepo.delete(e);
+    }
+
+    @GetMapping("/{expenseId}")
+    public ExpenseResponse get(@PathVariable Long expenseId) {
+        var u = currentUser.requireUser();
+
+        Expense e = expenseRepo.findByIdAndUser_Id(expenseId, u.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense non trovata"));
+
+        return new ExpenseResponse(e.getId(), e.getType(), e.getDescription(), e.getAmount(), e.getDate());
     }
 }

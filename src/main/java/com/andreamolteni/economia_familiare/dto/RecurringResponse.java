@@ -6,7 +6,6 @@ import java.util.List;
 
 public record RecurringResponse(
         Long id,
-        Long userId,
         String type,
         String description,
         List<BigDecimal> amount,

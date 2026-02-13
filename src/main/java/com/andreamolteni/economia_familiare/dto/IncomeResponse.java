@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 public record IncomeResponse(
         Long id,
-        Long userId,
         String type,
         String description,
         BigDecimal amount,
