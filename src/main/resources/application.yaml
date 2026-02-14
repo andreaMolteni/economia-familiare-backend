@@ -7,7 +7,6 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-
 security:
   jwt:
     secret: "DSAFGJOSDGJBDVNSORUGHE57649THG938G5H9H9539H84HE8GH9WERW0HJFI4HF98E4GHE98H"
