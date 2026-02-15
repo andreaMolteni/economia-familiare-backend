@@ -25,6 +25,8 @@ security:
     issuer: "economia-familiare"
     accessTokenMinutes: 1
     refreshTokenDays: 7
+    cookie-secure: false
+    cookie-samesite: Lax
 
 app:
   cors:

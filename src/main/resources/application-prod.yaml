@@ -9,6 +9,8 @@ app:
     refresh-cookie-name: "refresh_token"
     refresh-cookie-path: "/auth"
     refresh-cookie-days: 7
+    cookie-secure: true
+    cookie-samesite: None
 
 spring:
   datasource:

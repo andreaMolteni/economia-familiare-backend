@@ -1,6 +1,8 @@
 package com.andreamolteni.economia_familiare.controller;
 
+import com.andreamolteni.economia_familiare.security.AuthCookieService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -20,7 +22,6 @@ import com.andreamolteni.economia_familiare.dto.LoginResponse;
 import com.andreamolteni.economia_familiare.security.JwtService;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -30,7 +31,11 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final JwtDecoder jwtDecoder;
+
+    @Autowired
     private final UserDetailsService userDetailsService;
+
+    private AuthCookieService authCookieService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtService jwtService,
@@ -51,18 +56,11 @@ public class AuthController {
 
             var principal = (UserDetails) auth.getPrincipal();
             var roles = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+            String username = principal.getUsername();
+            String accessToken = jwtService.generateAccessToken(username, roles);
+            String newRefresh = jwtService.generateRefreshToken(username);
 
-            String accessToken = jwtService.generateAccessToken(principal.getUsername(), roles);
-            String refreshToken = jwtService.generateRefreshToken(principal.getUsername());
-
-            ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
-                    .httpOnly(true)
-                    .secure(false)      // ✅ in dev; in prod true (https)
-                    .sameSite("Lax")    // ok per dev
-                    .path("/auth")
-                    .maxAge(Duration.ofDays(7))
-                    .build();
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            authCookieService.setRefreshCookie(response, newRefresh);
             return new LoginResponse(accessToken, "Bearer", jwtService.accessTokenExpiresInSeconds());
         } catch (BadCredentialsException ex) {
             // 401 pulito
@@ -71,21 +69,26 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public LoginResponse refresh(@CookieValue(name = "refresh_token", required = false) String refreshToken,
-                                 HttpServletResponse response) {
-        System.out.println("HIT /auth/refresh - cookie present? " + (refreshToken != null && !refreshToken.isBlank()));
+    public LoginResponse refresh(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing refresh token");
         }
 
-        Jwt jwt = jwtDecoder.decode(refreshToken);
+        Jwt jwt;
+        try {
+            jwt = jwtDecoder.decode(refreshToken);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+        }
 
         if (!"refresh".equals(jwt.getClaimAsString("typ"))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
         }
 
         String username = jwt.getSubject();
-
         UserDetails user = userDetailsService.loadUserByUsername(username);
 
         List<String> roles = user.getAuthorities().stream()
@@ -94,7 +97,15 @@ public class AuthController {
 
         String newAccess = jwtService.generateAccessToken(username, roles);
 
-        return new LoginResponse(newAccess, "Bearer", jwtService.refreshTokenMaxAgeSeconds());
+        String newRefresh = jwtService.generateRefreshToken(username);
+
+        authCookieService.setRefreshCookie(response, newRefresh);
+
+        return new LoginResponse(
+                newAccess,
+                "Bearer",
+                jwtService.accessTokenExpiresInSeconds()
+        );
     }
 }
 
