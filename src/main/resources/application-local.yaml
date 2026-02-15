@@ -25,12 +25,16 @@ security:
     issuer: "economia-familiare"
     accessTokenMinutes: 140
     refreshTokenDays: 7
-    cookie-secure: false
-    cookie-samesite: Lax
 
 app:
   cors:
     allowed-origins: "http://localhost:5173"
+  security:
+    refresh-cookie-name: "refresh_token"
+    refresh-cookie-path: "/auth"
+    refresh-cookie-days: 7
+    cookie-secure: false
+    cookie-samesite: Lax
 
 logging:
   level:

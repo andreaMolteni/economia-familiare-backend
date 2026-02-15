@@ -5,19 +5,12 @@ server:
 app:
   cors:
     allowed-origins: "https://economia-familiare.pages.dev"
-security:
-  refresh-cookie-name: "refresh_token"
-  refresh-cookie-path: "/auth"
-  refresh-cookie-days: 7
-
-  jwt:
-    secret: ${JWT_SECRET}
-    issuer: "economia-familiare"
-    access-minutes: 15
-    accessTokenMinutes: 140
+  security:
+    refresh-cookie-name: "refresh_token"
+    refresh-cookie-path: "/auth"
+    refresh-cookie-days: 7
     cookie-secure: true
-    cookie-samesite: None
-    refreshTokenDays: 7
+    cookie-samesite: "None"   # mettila come stringa per sicurezza
 
 spring:
   datasource:
@@ -31,9 +24,12 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
+security:
+  jwt:
+    issuer: "economia-familiare"
+    accessTokenMinutes: 15
+    refreshTokenDays: 7
 
+# opzionale: se hai JwtEncoder/JwtDecoder che leggono JWT_SECRET da qui o direttamente da env
 jwt:
   secret: ${JWT_SECRET}
-  issuer: "economia-familiare"
-  access-minutes: 15
-  refresh-days: 7
