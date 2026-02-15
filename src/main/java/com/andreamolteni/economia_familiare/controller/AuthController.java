@@ -31,20 +31,19 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final JwtDecoder jwtDecoder;
-
-    @Autowired
     private final UserDetailsService userDetailsService;
-
-    private AuthCookieService authCookieService;
+    private final AuthCookieService authCookieService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtService jwtService,
                           JwtDecoder jwtDecoder,
-                          UserDetailsService userDetailsService) {
+                          UserDetailsService userDetailsService,
+                          AuthCookieService authCookieService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.jwtDecoder = jwtDecoder;
         this.userDetailsService = userDetailsService;
+        this.authCookieService = authCookieService;
     }
 
     @PostMapping("/login")

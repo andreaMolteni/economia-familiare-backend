@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class AuthCookieService {
 
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
     @Value("${app.security.cookie-secure}")
     private boolean cookieSecure;
@@ -20,11 +20,15 @@ public class AuthCookieService {
     @Value("${app.security.cookie-samesite}")
     private String cookieSameSite;
 
+    public AuthCookieService(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     public void setRefreshCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite(cookieSameSite)     // cross-site in prod
+                .sameSite(cookieSameSite)
                 .path("/auth")
                 .maxAge(Duration.ofSeconds(jwtService.refreshTokenMaxAgeSeconds()))
                 .build();
