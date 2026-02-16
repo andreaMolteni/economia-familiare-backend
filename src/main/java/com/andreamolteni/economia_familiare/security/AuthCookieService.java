@@ -14,6 +14,15 @@ public class AuthCookieService {
 
     private final JwtService jwtService;
 
+    @Value("${app.security.refresh-cookie-name}")
+    private String cookieName;
+
+    @Value("${app.security.refresh-cookie-path}")
+    private String cookiePath;
+
+    @Value("${app.security.refresh-cookie-days}")
+    private long cookieDays;
+
     @Value("${app.security.cookie-secure}")
     private boolean cookieSecure;
 
@@ -25,12 +34,19 @@ public class AuthCookieService {
     }
 
     public void setRefreshCookie(HttpServletResponse response, String refreshToken) {
+        String sameSite = cookieSameSite == null ? "Lax" : cookieSameSite.trim();
+
+        // Normalizza per sicurezza
+        if (!sameSite.equals("None") && !sameSite.equals("Lax") && !sameSite.equals("Strict")) {
+            sameSite = "Lax";
+        }
+
         ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .sameSite(cookieSameSite)
-                .path("/auth")
-                .maxAge(Duration.ofSeconds(jwtService.refreshTokenMaxAgeSeconds()))
+                .path(cookiePath)
+                .maxAge(Duration.ofSeconds(cookieDays))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
