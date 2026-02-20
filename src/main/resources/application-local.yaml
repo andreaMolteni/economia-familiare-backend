@@ -23,7 +23,7 @@ security:
   jwt:
     secret: "DSAFGJOSDGJBDVNSORUGHE57649THG938G5H9H9539H84HE8GH9WERW0HJFI4HF98E4GHE98H"
     issuer: "economia-familiare"
-    accessTokenMinutes: 140
+    accessTokenMinutes: 1
     refreshTokenDays: 7
 
 app:
@@ -35,6 +35,8 @@ app:
     refresh-cookie-days: 7
     cookie-secure: false
     cookie-samesite: Lax
+  dev:
+    artificial-delay-ms: 1500
 
 logging:
   level:

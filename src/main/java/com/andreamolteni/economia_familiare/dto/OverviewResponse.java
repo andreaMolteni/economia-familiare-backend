@@ -9,7 +9,9 @@ public record OverviewResponse(
         LocalDate periodEnd,
         List<FlattenedRow> expenses,
         List<FlattenedRow> income,
-        Totals totals
+        Totals totals,
+        int closingDay,
+        BigDecimal availableBalance
 ) {
     public record Totals(
             BigDecimal expensesMonth,

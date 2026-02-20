@@ -67,8 +67,4 @@ public class JwtService {
     public long accessTokenExpiresInSeconds() {
         return accessTokenMinutes * 60;
     }
-
-    public long refreshTokenMaxAgeSeconds() {
-        return refreshTokenDays * 24 * 60 * 60;
-    }
 }

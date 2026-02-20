@@ -4,6 +4,7 @@ import com.andreamolteni.economia_familiare.dto.FlattenedRow;
 import com.andreamolteni.economia_familiare.dto.OverviewResponse;
 import com.andreamolteni.economia_familiare.entity.*;
 import com.andreamolteni.economia_familiare.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +20,8 @@ public class OverviewService {
     private final IncomeRepository incomeRepo;
     private final RecurringExpenseRepository recurringExpenseRepo;
     private final RecurringIncomeRepository recurringIncomeRepo;
+    @Value("${app.dev.artificial-delay-ms:0}")
+    private long artificialDelayMs;
 
     public OverviewService(
             ExpenseRepository expenseRepo,
@@ -32,7 +35,17 @@ public class OverviewService {
         this.recurringIncomeRepo = recurringIncomeRepo;
     }
 
-    public OverviewResponse build(Long userId, LocalDate referenceDate, int closingDay, LocalDate asOf) {
+    public OverviewResponse build(Long userId, LocalDate referenceDate, int closingDay, LocalDate asOf, BigDecimal availableBalance) {
+
+        // simula latenza in ambiente dev
+        if (artificialDelayMs > 0) {
+            try {
+                Thread.sleep(artificialDelayMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
         AccountingPeriod period = AccountingPeriod.of(referenceDate, closingDay);
 
         List<FlattenedRow> expenses = flattenExpenses(userId, period, asOf);
@@ -52,7 +65,7 @@ public class OverviewService {
                 incomeNotExpired.subtract(expensesNotExpired)
         );
 
-        return new OverviewResponse(period.start(), period.end(), expenses, income, totals);
+        return new OverviewResponse(period.start(), period.end(), expenses, income, totals, closingDay, availableBalance);
     }
 
     private List<FlattenedRow> flattenExpenses(Long userId, AccountingPeriod period, LocalDate asOf) {
